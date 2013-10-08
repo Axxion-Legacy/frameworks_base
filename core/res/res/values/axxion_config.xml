@@ -24,6 +24,10 @@
     <item>reboot_recovery</item>
     <item>reboot_bootloader</item>
   </string-array>
+
     <!-- Doze: force using accelerometer as pick up sensor -->
     <bool name="config_dozeUseAccelerometer">false</bool>
+
+    <!-- True if the gesture service should be started at system start -->
+    <bool name="config_enableGestureService">false</bool>
 </resources>
