@@ -3899,6 +3899,30 @@ public final class Settings {
         public static final String RECENTS_USE_OMNISWITCH = "recents_use_omniswitch";
 
         /**
+         * Whether to show a battery status text
+         * @hide
+         */
+        public static final String STATUS_BAR_BATTERY_STATUS_SHOW_TEXT = "battery_status_show_text";
+
+        /**
+         * Whether to show the charging animation
+         * @hide
+         */
+        public static final String STATUS_BAR_BATTERY_STATUS_SHOW_CHARGING_ANIMATION = "battery_status_show_charging_animation";
+
+        /**
+         *Battery color
+         * @hide
+         */
+        public static final String STATUS_BAR_BATTERY_COLOR = "battery_status_battery_color";
+
+        /**
+         * Battery text color
+         * @hide
+         */
+        public static final String STATUS_BAR_BATTERY_TEXT_COLOR = "battery_status_text_color";
+        
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
