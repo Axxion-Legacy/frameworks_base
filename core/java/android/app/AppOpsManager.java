@@ -524,7 +524,6 @@ public class AppOpsManager {
             null,
             null,
             null,
-            null,
             OPSTR_SU,
     };
 
