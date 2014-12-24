@@ -3922,6 +3922,19 @@ public final class Settings {
          */
         public static final String STATUS_BAR_BATTERY_TEXT_COLOR = "battery_status_text_color";
         
+
+		/**
+         * Color of the text on the header of the expanded status bar
+         * @hide
+         */
+        public static final String STATUS_BAR_EXPANDED_HEADER_TEXT_COLOR = "status_bar_expanded_header_text_color";
+
+        /**
+         * Color of the icons on the header of the expanded status bar
+         * @hide
+         */
+        public static final String STATUS_BAR_EXPANDED_HEADER_ICON_COLOR = "status_bar_expanded_header_icon_color";
+        
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
