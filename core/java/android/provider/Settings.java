@@ -3873,6 +3873,13 @@ public final class Settings {
         public static final String BATTERY_SAVER_MODE_COLOR = "battery_save_mode_color";
 
         /**
+         * Defines the global heads up notification decay
+         *
+         * @hide
+         */
+        public static final String HEADS_UP_NOTIFCATION_DECAY = "heads_up_notification_decay";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
