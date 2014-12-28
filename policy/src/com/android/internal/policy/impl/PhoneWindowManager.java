@@ -7058,6 +7058,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     ProgressDialog mBootMsgDialog = null;
 
+
+    /**
+     * name of package currently being dex optimized
+     * as shown through this.showBootMessage(msg, always);
+     */
+    static String currentPackageName;
+    public void setPackageName(String pkgName) {
+        if (pkgName == null) {
+            pkgName = "stop.looking.at.me.swan";
+        }
+        this.currentPackageName = pkgName;
+    }
+
     /** {@inheritDoc} */
     @Override
     public void showBootMessage(final CharSequence msg, final boolean always) {
@@ -7126,8 +7139,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // Calculate random text color
                     Random rand = new Random();
                     String randomColor = Integer.toHexString(rand.nextInt(0xFFFFFF) & 0xFCFCFC );
-                    mBootMsgDialog.setMessage(Html.fromHtml("<br><b><font color=\"#" + randomColor + "\">" +
-                                                            msg +
+                    mBootMsgDialog.setMessage(Html.fromHtml(msg + "<br><b><font color=\"#" + randomColor + "\">" +
+                                                            currentPackageName +
                                                             "</font></b>"));
                 } else {
                     mBootMsgDialog.setMessage(msg);
