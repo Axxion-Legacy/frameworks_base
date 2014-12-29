@@ -72,6 +72,7 @@ import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.speech.RecognizerIntent;
 import android.telecom.TelecomManager;
+import android.text.Html;
 import android.service.gesture.EdgeGestureManager;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -132,6 +133,7 @@ import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.List;
 import java.lang.reflect.Constructor;
+import java.util.Random;
 
 import static android.view.WindowManager.LayoutParams.*;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
@@ -7061,6 +7063,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void showBootMessage(final CharSequence msg, final boolean always) {
         mHandler.post(new Runnable() {
             @Override public void run() {
+				String currentPackageName = "eat.a.sandwisshhhhh";
                 if (mBootMsgDialog == null) {
                     int theme;
                     if (mContext.getPackageManager().hasSystemFeature(
@@ -7115,7 +7118,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mBootMsgDialog.setCancelable(false);
                     mBootMsgDialog.show();
                 }
-                mBootMsgDialog.setMessage(msg);
+
+                // Only display the current package name if the main message says "Optimizing app N of M".
+                // We don't want to do this when the message says "Starting apps" or "Finishing boot", etc.
+                if (always && (currentPackageName != null)) {
+
+                    // Calculate random text color
+                    Random rand = new Random();
+                    String randomColor = Integer.toHexString(rand.nextInt(0xFFFFFF) & 0xFCFCFC );
+                    mBootMsgDialog.setMessage(Html.fromHtml("<br><b><font color=\"#" + randomColor + "\">" +
+                                                            msg +
+                                                            "</font></b>"));
+                } else {
+                    mBootMsgDialog.setMessage(msg);
+                }
             }
         });
     }
