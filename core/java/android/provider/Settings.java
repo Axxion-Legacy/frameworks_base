@@ -3893,6 +3893,12 @@ public final class Settings {
         public static final String STATUS_BAR_POWER_MENU = "status_bar_power_menu";
 
         /**
+         * Alternative recent apps integration using OmniSwitch
+         * @hide
+         */
+        public static final String RECENTS_USE_OMNISWITCH = "recents_use_omniswitch";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
