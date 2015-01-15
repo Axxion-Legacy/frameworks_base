@@ -56,6 +56,7 @@ import android.widget.TextView;
 
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.BatteryMeterView;
+import com.android.systemui.BatteryLevelTextView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
@@ -96,7 +97,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private Switch mQsDetailHeaderSwitch;
     private ImageView mQsDetailHeaderProgress;
     private TextView mEmergencyCallsOnly;
-    private TextView mBatteryLevel;
+    private BatteryLevelTextView mBatteryLevel;
     private TextView mAlarmStatus;
     private ImageView mStatusBarPowerMenu;
 
@@ -157,6 +158,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private int mStatusBarPowerMenuStyle;
 
     private SettingsObserver mSettingsObserver;
+    private boolean mShowBatteryTextExpanded;    
     private int mTextColor;
     private int mIconColor;
 
@@ -187,7 +189,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mQsDetailHeaderSwitch = (Switch) mQsDetailHeader.findViewById(android.R.id.toggle);
         mQsDetailHeaderProgress = (ImageView) findViewById(R.id.qs_detail_header_progress);
         mEmergencyCallsOnly = (TextView) findViewById(R.id.header_emergency_calls_only);
-        mBatteryLevel = (TextView) findViewById(R.id.battery_level);
+        mBatteryLevel = (BatteryLevelTextView) findViewById(R.id.battery_level_text);
         mStatusBarPowerMenu = (ImageView) findViewById(R.id.status_bar_power_menu);
         mStatusBarPowerMenu.setOnClickListener(this);
         mStatusBarPowerMenu.setLongClickable(true);
@@ -201,8 +203,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         updateVisibilities();
         updateClockScale();
         updateAvatarScale();
-        updateTextColor();
-        updateIconColor();
+        updateTextColorSettings();
+		updateIconColorSettings();
         addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View v, int left, int top, int right,
@@ -244,7 +246,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        FontSizeUtils.updateFontSize(mBatteryLevel, R.dimen.battery_level_text_size);
         FontSizeUtils.updateFontSize(mEmergencyCallsOnly,
                 R.dimen.qs_emergency_calls_only_text_size);
         FontSizeUtils.updateFontSize(mDateCollapsed, R.dimen.qs_date_collapsed_size);
@@ -312,6 +313,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     public void setBatteryController(BatteryController batteryController) {
         mBatteryController = batteryController;
         ((BatteryMeterView) findViewById(R.id.battery)).setBatteryController(batteryController);
+        mBatteryLevel.setBatteryController(batteryController);        
     }
 
     public void setNextAlarmController(NextAlarmController nextAlarmController) {
@@ -356,8 +358,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         updateAvatarScale();
         updateClockLp();
         requestCaptureValues();
-        updateTextColor();
-        updateIconColor();
+        updateTextColorSettings();
+		updateIconColorSettings();
     }
 
     private void updateHeights() {
@@ -382,8 +384,13 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             updateSignalClusterDetachment();
         }
         mEmergencyCallsOnly.setVisibility(mExpanded && mShowEmergencyCallsOnly ? VISIBLE : GONE);
-        mBatteryLevel.setVisibility(mExpanded && mShowBatteryLevel? View.VISIBLE : View.GONE);
+        updateBatteryLevelVisibility();   
     }
+    
+    private void updateBatteryLevelVisibility() {
+        mBatteryLevel.setForceShown(mExpanded && mShowBatteryTextExpanded);
+        mBatteryLevel.setVisibility(View.VISIBLE);
+	}    
 
     private void updateSignalClusterDetachment() {
         boolean detached = mExpanded;
@@ -457,7 +464,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     @Override
     public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
-        mBatteryLevel.setText(getResources().getString(R.string.battery_level_template, level));
+        // could not care less
     }
 
     @Override
@@ -775,6 +782,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         float batteryLevelAlpha;
         float taskManagerAlpha;
         float taskManagerTranslation;
+        float batteryLevelExpandedAlpha;        
         float settingsAlpha;
         float settingsTranslation;
         float signalClusterAlpha;
@@ -807,6 +815,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             float t3 = Math.max(0, t - 0.7f) / 0.3f;
             batteryLevelAlpha = v1.batteryLevelAlpha * (1 - t3) + v2.batteryLevelAlpha * t3;
             taskManagerAlpha = v1.taskManagerAlpha * (1 - t3) + v2.taskManagerAlpha * t3;
+            batteryLevelExpandedAlpha =
+					v1.batteryLevelExpandedAlpha * (1 - t3) + v2.batteryLevelExpandedAlpha * t3;            
             settingsAlpha = v1.settingsAlpha * (1 - t3) + v2.settingsAlpha * t3;
             dateExpandedAlpha = v1.dateExpandedAlpha * (1 - t3) + v2.dateExpandedAlpha * t3;
             dateCollapsedAlpha = v1.dateCollapsedAlpha * (1 - t3) + v2.dateCollapsedAlpha * t3;
@@ -931,46 +941,77 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_EXPANDED_HEADER_ICON_COLOR),
                     false, this);
-            update();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_BATTERY_STATUS_STYLE),
+                    false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_BATTERY_STATUS_PERCENT_STYLE),
+					false, this);                    
+            updateSettings();
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-			if (uri.equals(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_EXPANDED_HEADER_TEXT_COLOR))) {
-                updateTextColor();
-            } else if (uri.equals(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_EXPANDED_HEADER_ICON_COLOR))) {
-                updateIconColor();
-            }
-
+             if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_BATTERY_STATUS_STYLE))
+                || uri.equals(Settings.System.getUriFor(
+                   Settings.System.STATUS_BAR_BATTERY_STATUS_PERCENT_STYLE))) {
+                updateBatteryPercentageSettings();
+             } else if (uri.equals(Settings.System.getUriFor(
+                     Settings.System.STATUS_BAR_EXPANDED_HEADER_TEXT_COLOR))) {
+                updateTextColorSettings();
+             } else if (uri.equals(Settings.System.getUriFor(
+                     Settings.System.STATUS_BAR_EXPANDED_HEADER_ICON_COLOR))) {
+			updateIconColorSettings();
+			}
         }
-
-        public void update() {
-            ContentResolver resolver = mContext.getContentResolver();
-            mTextColor = Settings.System.getInt(resolver,
-                    Settings.System.STATUS_BAR_EXPANDED_HEADER_TEXT_COLOR, 0xffffffff);
-            mIconColor = Settings.System.getInt(resolver,
-                    Settings.System.STATUS_BAR_EXPANDED_HEADER_ICON_COLOR, 0xffffffff);
-            updateVisibilities();
-            updateTextColor();
-            updateIconColor();
+        
+        public void updateSettings() {
+            updateBatteryPercentageSettings();
+            updateTextColorSettings();
+            updateIconColorSettings();
         }
     }
 
-    private void updateTextColor() {
+    private void updateBatteryPercentageSettings() {
+        ContentResolver resolver = mContext.getContentResolver();
+        int batteryStyle = Settings.System.getInt(resolver,
+                Settings.System.STATUS_BAR_BATTERY_STATUS_STYLE, 0);
+        boolean showExpandedBatteryPercentage = Settings.System.getInt(resolver,
+                Settings.System.STATUS_BAR_BATTERY_STATUS_PERCENT_STYLE, 2) == 2;
+
+        switch (batteryStyle) {
+            case 3: //BATTERY_METER_TEXT
+            case 4: //BATTERY_METER_GONE
+                showExpandedBatteryPercentage = false;
+                break;
+            default:
+                break;
+        }
+        mShowBatteryTextExpanded = showExpandedBatteryPercentage;
+        updateBatteryLevelVisibility();
+    }
+
+    private void updateTextColorSettings() {
+        ContentResolver resolver = mContext.getContentResolver();
+        mTextColor = Settings.System.getInt(resolver,
+				 Settings.System.STATUS_BAR_EXPANDED_HEADER_TEXT_COLOR, 0xffffffff);
+
         mTime.setTextColor(mTextColor);
         mAmPm.setTextColor(mTextColor);
         mDateCollapsed.setTextColor(
                 getTransparentColor(mTextColor, 178));
         mDateExpanded.setTextColor(
                 getTransparentColor(mTextColor, 178));
-        mBatteryLevel.setTextColor(mTextColor);
+        mBatteryLevel.setTextColor(true);
         mAlarmStatus.setTextColor(
                 getTransparentColor(mTextColor, 100));
     }
 
-    private void updateIconColor() {
+    private void updateIconColorSettings() {
+        ContentResolver resolver = mContext.getContentResolver();
+        mIconColor = Settings.System.getInt(resolver,
+					Settings.System.STATUS_BAR_EXPANDED_HEADER_ICON_COLOR, 0xffffffff);
         ((ImageView)mSettingsButton).setColorFilter(mIconColor, Mode.MULTIPLY);
         Drawable alarmIcon = getResources().getDrawable(R.drawable.ic_access_alarms_small);
         alarmIcon.setColorFilter(mIconColor, Mode.MULTIPLY);
