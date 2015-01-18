@@ -79,6 +79,7 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
     private AudioManagerInternal mAudioManager;
     private int mPreviousRingerMode = -1;
     private boolean mEffectsSuppressed;
+    private int mPreviousZenMode = -1;
 
     public ZenModeHelper(Context context, Looper looper) {
         mContext = context;
@@ -267,6 +268,33 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
         mAppOps.setRestriction(AppOpsManager.OP_PLAY_AUDIO, usage,
                 mute ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
                 exceptionPackages);
+
+        // force ringer mode into compliance
+        if (mAudioManager != null) {
+            int ringerMode = mAudioManager.getRingerMode();
+            int forcedRingerMode = -1;
+            if (mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
+                // if new mode is no interrupt silence ringer
+                if (ringerMode != AudioManager.RINGER_MODE_SILENT) {
+                    mPreviousRingerMode = ringerMode;
+                    if (DEBUG) Slog.d(TAG, "Silencing ringer");
+                    forcedRingerMode = AudioManager.RINGER_MODE_SILENT;
+                }
+            } else if (mPreviousZenMode != -1 && mPreviousZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
+                // when coming back from no interruption set back ringer
+                if (ringerMode == AudioManager.RINGER_MODE_SILENT) {
+                    if (DEBUG) Slog.d(TAG, "Unsilencing ringer");
+                    forcedRingerMode = mPreviousRingerMode != -1 ? mPreviousRingerMode
+                            : AudioManager.RINGER_MODE_NORMAL;
+                }
+            }
+            if (forcedRingerMode != -1) {
+                mAudioManager.setRingerMode(forcedRingerMode, false /*checkZen*/);
+                ZenLog.traceSetRingerMode(forcedRingerMode);
+            }
+        }
+        mPreviousZenMode = mZenMode;
+        dispatchOnZenModeChanged();
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -329,6 +357,29 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
         }
         if (newRingerModeInternal != -1) {
             mAudioManager.setRingerModeInternal(newRingerModeInternal, TAG);
+		}
+	}
+		
+    private void handleRingerModeChanged() {
+        if (mAudioManager != null) {
+            // follow ringer mode if necessary
+            final int ringerMode = mAudioManager.getRingerMode();
+            int newZen = -1;
+            // why should ringer mode directly influence important zen mode?
+            /*if (ringerMode == AudioManager.RINGER_MODE_SILENT) {
+                if (mZenMode == Global.ZEN_MODE_OFF) {
+                    newZen = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+                }
+            } else*/
+            if ((ringerMode == AudioManager.RINGER_MODE_NORMAL
+                    || ringerMode == AudioManager.RINGER_MODE_VIBRATE)
+                    && mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
+                newZen = Global.ZEN_MODE_OFF;
+            }
+            if (newZen != -1) {
+                ZenLog.traceFollowRingerMode(ringerMode, mZenMode, newZen);
+                setZenMode(newZen, "ringerMode");
+            }
         }
     }
 
