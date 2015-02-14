@@ -25,4 +25,6 @@
     <string name="global_action_reboot_recovery">Recovery</string>
     <string name="global_action_reboot_bootloader">Bootloader</string>
     <string name="global_action_current_user">Current</string>
+
+    <string name="hide_lock_to_app_dialog">Always start</string>
 </resources>

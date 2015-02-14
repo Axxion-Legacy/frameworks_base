@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/* apps/common/assets/default/default/skins/StatusBar.xml
+/* //device/apps/common/res/layout/alert_dialog.xml
 **
-** Copyright 2011, The Android Open Source Project
+** Copyright 2014, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -19,18 +19,27 @@
 -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/mobile_combo"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingTop="15dip"
+    android:paddingBottom="0dip"
+    android:paddingStart="16dip"
+    android:paddingEnd="25dip"
+    android:orientation="vertical"
     >
-    <ImageView
-        android:id="@+id/mobile_signal"
+
+    <CheckBox
+        android:id="@+id/lock_to_app_checkbox"
+        style="?android:style/TextAppearance.Material.Subhead"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        />
-    <ImageView
-        android:id="@+id/mobile_type"
+        android:visibility="gone" />
+
+    <CheckBox
+        android:id="@+id/hide_lock_to_app_checkbox"
+        style="?android:style/TextAppearance.Material.Subhead"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        />
-</FrameLayout>
+        android:text="@string/hide_lock_to_app_dialog" />
+
+</LinearLayout>

@@ -24,4 +24,6 @@
   <java-symbol type="id" name="option5" />
   <java-symbol type="style" name="GlobalActionsAnimation" />
 
+  <java-symbol type="id" name="hide_lock_to_app_checkbox" />
+
 </resources>

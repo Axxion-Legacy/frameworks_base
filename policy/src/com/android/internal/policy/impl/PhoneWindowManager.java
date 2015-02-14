@@ -116,6 +116,9 @@ import com.android.internal.util.slim.HwKeyHelper;
 import com.android.internal.util.slim.Action;
 import com.android.internal.widget.PointerLocationView;
 import com.android.server.LocalServices;
+import com.android.internal.util.omni.TaskUtils;
+import com.android.internal.util.omni.OmniSwitchConstants;
+import com.android.internal.util.omni.DeviceUtils;
 
 import dalvik.system.DexClassLoader;
 
@@ -3360,14 +3363,36 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         Action.processAction(mContext, mDoubleTapOnAssistBehavior, false);
                     }
                 } else if (longPress) {
-                    if (!keyguardOn
-                            && !mLongPressOnAssistBehavior.equals(ActionConstants.ACTION_NULL)) {
-                        if (!mLongPressOnAssistBehavior.equals(ActionConstants.ACTION_RECENTS)) {
-                            cancelPreloadRecentApps();
+                    if (mRecentAppsPreloaded &&
+                            mLongPressOnMenuBehavior != KEY_ACTION_APP_SWITCH) {
+                        cancelPreloadRecentApps();
+                    }
+                    if (!keyguardOn) {
+                        // check for locked mode
+                        if (stopLockTaskMode()) {
+                            // Do not perform action when key is released
+                            mMenuDoCustomAction = false;
+                            return -1;
                         }
-                        performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
-                        Action.processAction(mContext, mLongPressOnAssistBehavior, false);
-                        mAssistConsumed = true;
+                        if (mLongPressOnMenuBehavior != KEY_ACTION_NOTHING) {
+                            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+                            performKeyAction(mLongPressOnMenuBehavior);
+                            // Do not perform action when key is released
+                            mMenuDoCustomAction = false;
+                            return -1;
+                        }
+                    }
+                }
+            } else {
+                if (mRecentAppsPreloaded && mPressOnMenuBehavior != KEY_ACTION_APP_SWITCH &&
+                        mLongPressOnMenuBehavior != KEY_ACTION_APP_SWITCH) {
+                    cancelPreloadRecentApps();
+                }
+                if (mMenuDoCustomAction) {
+                    mMenuDoCustomAction = false;
+                    if (!canceled && !keyguardOn) {
+                        performKeyAction(mPressOnMenuBehavior);
+                        return -1;
                     }
                 }
             }
@@ -3572,14 +3597,31 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         Action.processAction(mContext, mDoubleTapOnBackBehavior, false);
                     }
                 } else if (longPress) {
-                    if (!keyguardOn
-                            && !mLongPressOnBackBehavior.equals(ActionConstants.ACTION_NULL)) {
-                        if (!mLongPressOnBackBehavior.equals(ActionConstants.ACTION_RECENTS)) {
-                            cancelPreloadRecentApps();
+                    if (mRecentAppsPreloaded &&
+                            mLongPressOnBackBehavior != KEY_ACTION_APP_SWITCH) {
+                        cancelPreloadRecentApps();
+                    }
+                    if (!keyguardOn) {
+                        if (mLongPressOnBackBehavior != KEY_ACTION_NOTHING) {
+                            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+
+                            performKeyAction(mLongPressOnBackBehavior);
+                            // Do not perform action when key is released
+                            mBackDoCustomAction = false;
+                            return -1;
                         }
-                        performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
-                        Action.processAction(mContext, mLongPressOnBackBehavior, false);
-                        mBackConsumed = true;
+                    }
+                }
+            } else {
+                if (mRecentAppsPreloaded && mPressOnBackBehavior != KEY_ACTION_APP_SWITCH &&
+                        mLongPressOnBackBehavior != KEY_ACTION_APP_SWITCH) {
+                    cancelPreloadRecentApps();
+                }
+                if (mBackDoCustomAction) {
+                    mBackDoCustomAction = false;
+                    if (!canceled && !keyguardOn) {
+                        performKeyAction(mPressOnBackBehavior);
+                        return -1;
                     }
                 }
             }
@@ -7725,6 +7767,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return mHomeWakeSupport;
         }
 
+        return false;
+    }
+
+    private boolean stopLockTaskMode() {
+        // in this case there is a different way to stop it
+        if (DeviceUtils.deviceSupportNavigationBar(mContext)) {
+            return false;
+        }
+        try {
+            if (ActivityManagerNative.getDefault().isInLockTaskMode()) {
+                ActivityManagerNative.getDefault().stopLockTaskModeOnCurrent();
+                return true;
+            }
+        } catch (RemoteException e) {
+        }
         return false;
     }
 }

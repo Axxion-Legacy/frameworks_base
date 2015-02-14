@@ -3485,6 +3485,12 @@ public final class Settings {
         public static final String RECENT_PANEL_SCALE_FACTOR = "recent_panel_scale_factor";
 
         /**
+         * Whether lock-to-app will lock the keyguard when exiting.
+         * @hide
+         */
+        public static final String LOCK_TO_APP_HIDE_DIALOG = "lock_to_app_hide_dialog";
+
+        /**
          * User favorite tasks for recent panel.
          * @hide
          */
