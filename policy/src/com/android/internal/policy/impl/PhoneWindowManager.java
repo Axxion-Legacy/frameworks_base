@@ -659,6 +659,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mScreenshotChordVolumeUpKeyTriggered;
     private boolean mScreenshotChordPowerKeyTriggered;
     private long mScreenshotChordPowerKeyTime;
+    private boolean mWakeKeyTriggered;
 
     /* The number of steps between min and max brightness */
     private static final int BRIGHTNESS_STEPS = 10;
@@ -5675,7 +5676,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (DEBUG_INPUT) {
             Log.d(TAG, "interceptKeyTq keycode=" + keyCode
                     + " interactive=" + interactive + " keyguardActive=" + keyguardActive
-                    + " policyFlags=" + Integer.toHexString(policyFlags));
+                    + " policyFlags=" + Integer.toHexString(policyFlags) + " down=" + down);
         }
 
         // Basic policy based on interactive state.
@@ -5697,8 +5698,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (interactive || (isInjected && !isWakeKey)) {
             // When the device is interactive or the key is injected pass the
             // key to the application.
-            result = ACTION_PASS_TO_USER;
+            if (mWakeKeyTriggered && !down) {
+                // ignore the up event from the key wake else
+                // you will get e.g. the volume adjust sound
+                result = 0;
+            } else {
+                result = ACTION_PASS_TO_USER;
+            }
             isWakeKey = false;
+            mWakeKeyTriggered = false;
         } else if (!interactive && shouldDispatchInputWhenNonInteractive()) {
             // If we're currently dozing with the screen on and the keyguard showing, pass the key
             // to the application but preserve its wake key status to make sure we still move
@@ -7764,8 +7772,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
                 if (DEBUG_WAKEUP) Log.i(TAG, "isOffscreenWakeKey: mVolumeWakeSupport " + mVolumeWakeSupport);
+                if (mVolumeWakeSupport) {
+                    mWakeKeyTriggered = true;
+                }
                 return mVolumeWakeSupport;
             case KeyEvent.KEYCODE_HOME:
+                if (DEBUG_WAKEUP) Log.i(TAG, "isOffscreenWakeKey: mHomeWakeSupport " + mHomeWakeSupport);
+                if (mHomeWakeSupport) {
+                    mWakeKeyTriggered = true;
+                }
                 return mHomeWakeSupport;
         }
 
