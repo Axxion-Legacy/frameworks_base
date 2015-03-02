@@ -86,6 +86,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.DateTimeView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -2277,6 +2278,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                 isExpanded = mStackScroller.getIsExpanded();
         }
 
+        final InputMethodManager inputMethodManager = (InputMethodManager)
+                mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        boolean isIMEShowing = inputMethodManager.isImeShowing();
+
         boolean interrupt = (isFullscreen || (isHighPriority && (isNoisy || hasTicker)))
                 && isAllowed
                 && !accessibilityForcesLaunch
@@ -2285,6 +2291,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 			|| mStatusBarKeyguardViewManager.isOccluded())
 		&& !mStatusBarKeyguardViewManager.isInputRestricted();
                 && !isExpanded;
+                && !zenBlocksHeadsUp
+                && !isIMEShowing;
 
         try {
             interrupt = interrupt && !mDreamManager.isDreaming();
@@ -2294,7 +2302,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // its below our threshold priority, we might want to always display
         // notifications from certain apps
-        if (!isHighPriority && !isOngoing && !isExpanded) {
+        if (!isHighPriority && !isOngoing && !isExpanded && !zenBlocksHeadsUp && !isIMEShowing) {
             // However, we don't want to interrupt if we're in an application that is
             // in Do Not Disturb
             if (!isPackageInDnd(getTopLevelPackage())) {
