@@ -83,8 +83,8 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
             mWasLastOn = SystemClock.uptimeMillis();
         }
 
-        if (arg instanceof UserBoolean) {
-            state.value = ((UserBoolean) arg).value;
+        if (arg instanceof Boolean) {
+            state.value = (Boolean) arg;
         }
 
         if (!state.value && mWasLastOn != 0) {
@@ -98,9 +98,7 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
 
         state.visible = mWasLastOn != 0 || mTorchAvailable;
         state.label = mHost.getContext().getString(R.string.quick_settings_flashlight_label);
-        final AnimationIcon icon = state.value ? mEnable : mDisable;
-        icon.setAllowAnimation(arg instanceof UserBoolean && ((UserBoolean) arg).userInitiated);
-        state.icon = icon;
+        state.icon = state.value ? mEnable : mDisable;
         int onOrOffId = state.value
                 ? R.string.accessibility_quick_settings_flashlight_on
                 : R.string.accessibility_quick_settings_flashlight_off;
