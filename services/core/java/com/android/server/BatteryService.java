@@ -750,7 +750,7 @@ public final class BatteryService extends SystemService {
                     // Battery is charging and low
                     mBatteryLight.setColor(mBatteryLowARGB);
                 } else if (mLedPulseEnabled) {
-                    // Battery is low and not charging
+                    // Flash red when battery is low and not charging
                     mBatteryLight.setFlashing(mBatteryLowARGB, Light.LIGHT_FLASH_TIMED,
                             mBatteryLedOn, mBatteryLedOff);
                 } else {
