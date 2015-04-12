@@ -686,7 +686,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             final String action = intent.getAction();
 			if (action.equals(Intent.ACTION_SCREENRECORD)) {
                 mHandler.removeCallbacks(mScreenrecordRunnable);
-                mHandler.post(mScreenrecordRunnable);        
+                mHandler.post(mScreenrecordRunnable);    
+			} else if (action.equals(Intent.ACTION_POWER_MENU)) {
+                showGlobalActionsInternal();
+            }
         }
 
         protected void register() {
@@ -695,6 +698,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
                 IntentFilter filter = new IntentFilter();
                 filter.addAction(Intent.ACTION_SCREENRECORD);                
+                filter.addAction(Intent.ACTION_POWER_MENU);                
                 mContext.registerReceiver(mCustomActionReceiver, filter);
             }
         }
