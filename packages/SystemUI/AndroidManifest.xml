@@ -123,6 +123,9 @@
 
     <!-- Screen Capturing -->
     <uses-permission android:name="android.permission.MANAGE_MEDIA_PROJECTION" />
+   
+     <!-- Action Target -->
+    <uses-permission android:name="android.permission.FORCE_STOP_PACKAGES" />
 
     <!-- Visualizer tile -->
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
