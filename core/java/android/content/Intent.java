@@ -739,6 +739,14 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.shortcut.ICON_RESOURCE";
 
     /**
+     * PhoneWindowManager: Take Screenrecord via takeScreenrecord()
+     *  <p>Input: nothing
+     *  <p>Output: nothing
+     *  @hide
+     */
+	public static final String ACTION_SCREENRECORD = "android.intent.action.SCREENRECORD";
+    
+    /**
      * Represents a shortcut/live folder icon resource.
      *
      * @see Intent#ACTION_CREATE_SHORTCUT
