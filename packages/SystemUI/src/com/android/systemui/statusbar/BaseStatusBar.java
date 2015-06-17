@@ -76,6 +76,7 @@ import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -120,7 +121,7 @@ import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks, ActivatableNotificationView.OnActivatedListener,
         RecentsComponent.Callbacks, ExpandableNotificationRow.ExpansionLogger,
-        NotificationData.Environment {
+        NotificationData.Environment, View.OnLongClickListener {
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     public static final boolean MULTIUSER_DEBUG = false;
@@ -867,6 +868,13 @@ public abstract class BaseStatusBar extends SystemUI implements
         startNotificationGutsIntent(intent, appUid);
     }
 
+    private void startApplicationInfoActivity(String packageName) {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.fromParts("package", packageName, null));
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        mContext.startActivity(intent);
+    }    
+
     private void startNotificationGutsIntent(final Intent intent, final int appUid) {
         final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
         dismissKeyguardThenExecute(new OnDismissAction() {
@@ -925,6 +933,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         ((DateTimeView) row.findViewById(R.id.timestamp)).setTime(sbn.getPostTime());
         ((TextView) row.findViewById(R.id.pkgname)).setText(appname);
         final View settingsButton = guts.findViewById(R.id.notification_inspect_item);
+        settingsButton.setLongClickable(true);        
+        final View infoButton = guts.findViewById(R.id.notification_info_item);        
         final View appSettingsButton
                 = guts.findViewById(R.id.notification_inspect_app_provided_settings);
         if (appUid >= 0) {
@@ -934,7 +944,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     startAppNotificationSettingsActivity(pkg, appUidF);
                 }
             });
-
+			settingsButton.setOnLongClickListener(this);                    
             final Intent appSettingsQueryIntent
                     = new Intent(Intent.ACTION_MAIN)
                     .addCategory(Notification.INTENT_CATEGORY_NOTIFICATION_PREFERENCES)
@@ -964,9 +974,23 @@ public abstract class BaseStatusBar extends SystemUI implements
             settingsButton.setVisibility(View.GONE);
             appSettingsButton.setVisibility(View.GONE);
         }
+            infoButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    startApplicationInfoActivity(pkg);
+                }
+            });          
 
     }
 
+    @Override
+    public boolean onLongClick(View v) {
+		Intent intent = new Intent(Intent.ACTION_MAIN);
+		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		intent.setClassName("com.android.settings",
+			"com.android.settings.Settings$NotificationStationActivity");
+		mContext.startActivity(intent);
+		return true;		
+    }
     protected SwipeHelper.LongPressListener getNotificationLongClicker() {
         return new SwipeHelper.LongPressListener() {
             @Override
