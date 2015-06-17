@@ -45,6 +45,8 @@ import android.view.KeyEvent;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyControl;
 
+import com.android.internal.R;
+import com.android.internal.util.omni.TaskUtils;
 import com.android.internal.statusbar.IStatusBarService;
 
 import java.net.URISyntaxException;
@@ -107,14 +109,19 @@ public class Action {
             } else if (action.equals(ActionConstants.ACTION_BACK)) {
                 triggerVirtualKeypress(KeyEvent.KEYCODE_BACK, isLongpress);
                 return;
+            } else if (action.equals(ActionConstants.ACTION_RECENTS)) {                
+                try {
+                    barService.toggleRecentApps();
+                } catch (RemoteException e) {
+                }  
+                return;                
             } else if (action.equals(ActionConstants.ACTION_SEARCH)) {
                 triggerVirtualKeypress(KeyEvent.KEYCODE_SEARCH, isLongpress);
                 return;
             } else if (action.equals(ActionConstants.ACTION_KILL)) {
-                if (isKeyguardShowing) return;
-                try {
-                    barService.toggleKillApp();
-                } catch (RemoteException e) {}
+-                try {
+-                    barService.toggleKillApp();
+-                } catch (RemoteException e) {}
                 return;
             } else if (action.equals(ActionConstants.ACTION_NOTIFICATIONS)) {
                 if (isKeyguardShowing && isKeyguardSecure) {
@@ -338,6 +345,9 @@ public class Action {
                     barService.toggleScreenshot();
                 } catch (RemoteException e) {}
                 return;
+            } else if (action.equals(ActionConstants.ACTION_SCREENRECORD)) {
+                context.sendBroadcast(new Intent(Intent.ACTION_SCREENRECORD));
+                return;                  
             } else {
                 // we must have a custom uri
                 Intent intent = null;
