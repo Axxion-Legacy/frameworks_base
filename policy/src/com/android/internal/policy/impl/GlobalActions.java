@@ -128,6 +128,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private boolean mHasVibrator;
     private final boolean mShouldShowSilentToggle;
     private boolean mShowSilentToggle;
+	private boolean mShowAirplaneToggle;
     private String[] mMenuActions;
     private boolean mRebootMenu;
     private boolean mUserMenu;
@@ -336,7 +337,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private void buildMenuList() {
         mShowSilentToggle = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.GLOBAL_ACTIONS_SHOW_SOUND_PANEL, 1) == 1; 		
+                    Settings.System.GLOBAL_ACTIONS_SHOW_SOUND_PANEL, 1) == 1; 
+        mShowAirplaneToggle = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.GLOBAL_ACTIONS_SHOW_AIRPLANE_TOGGLE, 1) == 1;
         mItems = new ArrayList<Action>();
         ArraySet<String> addedKeys = new ArraySet<String>();
         for (int i = 0; i < mMenuActions.length; i++) {
@@ -355,7 +358,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             } else if (advancedRebootEnabled(mContext) && GLOBAL_ACTION_KEY_REBOOT_BOOTLOADER.equals(actionKey)) {
                 mItems.add(new RebootBootloaderAction());
             } else if (GLOBAL_ACTION_KEY_AIRPLANE.equals(actionKey)) {
+				if (mShowAirplaneToggle) {
                 mItems.add(mAirplaneModeOn);
+				}
             } else if (GLOBAL_ACTION_KEY_BUGREPORT.equals(actionKey)) {
                 if (Settings.Global.getInt(mContext.getContentResolver(),
                         Settings.Global.BUGREPORT_IN_POWER_MENU, 0) != 0 && isCurrentUserOwner()) {

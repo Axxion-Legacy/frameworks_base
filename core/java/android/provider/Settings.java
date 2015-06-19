@@ -4025,7 +4025,13 @@ public final class Settings {
         public static final String GLOBAL_ACTIONS_SHOW_SOUND_PANEL = "global_actions_show_sound_panel";            
         
        	/**
-		 * Wheter to show or not sound panel in power menu
+		 * Wheter to show or not airplane mode toggle in power menu
+         * @hide
+         */        
+		public static final String GLOBAL_ACTIONS_SHOW_AIRPLANE_TOGGLE = "global_actions_show_airplane_toggle";
+        
+       	/**
+		 * Choose 4 available positions with animations (0 is disabled)
          * @hide
          */
         public static final String GLOBAL_ACTIONS_POSITION = "global_actions_position";         
