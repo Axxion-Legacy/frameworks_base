@@ -21,6 +21,7 @@
     <!-- Reboot -->
     <string name="global_action_reboot">Reboot</string>
     <string name="global_action_reboot_more">Reboot\u2026</string>
+    <string name="global_action_soft_reboot">Soft Reboot</string>
     <string name="global_action_reboot_sub">System</string>
     <string name="global_action_reboot_recovery">Recovery</string>
     <string name="global_action_reboot_bootloader">Bootloader</string>
