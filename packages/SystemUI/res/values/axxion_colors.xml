@@ -57,5 +57,13 @@
     <!-- Color for notification icons -->
     <color name="notification_icon_color">#FFFFFFFF</color>
     <!-- Navigation button ripple color -->
-    <color name="navbutton_ripple_color">#FFFFFFFF</color>    
+    <color name="navbutton_ripple_color">#FFFFFFFF</color>
+    
+    <!-- fab -->
+    <color name="fab_background_color">#ffffffff</color>
+    <color name="fab_ripple_color">#4dffffff</color>
+    <!-- The default color for the clear recents button icon on light background  -->
+    <color name="fab_icon_dark_color">#8a000000</color>
+	<!-- The default color of the clear recents button icon on dark background  -->
+    <color name="fab_icon_light_color">#ffffffff</color>
 </resources>

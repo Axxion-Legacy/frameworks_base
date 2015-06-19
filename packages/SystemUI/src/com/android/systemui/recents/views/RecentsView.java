@@ -18,19 +18,28 @@ package com.android.systemui.recents.views;
 
 import android.app.ActivityOptions;
 import android.app.TaskStackBuilder;
+import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowInsets;
+import android.widget.ImageView;
 import android.widget.FrameLayout;
+
+import com.android.internal.util.darkkat.ColorHelper;
 
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -39,6 +48,8 @@ import com.android.systemui.recents.model.RecentsPackageMonitor;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
+
+import com.android.systemui.R;
 
 import java.util.ArrayList;
 
@@ -65,7 +76,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     ArrayList<TaskStack> mStacks;
     View mSearchBar;
     RecentsViewCallbacks mCb;
-    View mClearRecents;
+
+    FrameLayout mClearRecentsLayout;
+    ImageView mClearRecents;
 
     public RecentsView(Context context) {
         super(context);
@@ -157,7 +170,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             View child = getChildAt(i);
             if (child != mSearchBar) {
                 TaskStackView stackView = (TaskStackView) child;
-                //stackView.dismissAllTasks();
+                stackView.dismissAllTasks();
             }
         }
     }
@@ -236,6 +249,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         // We have to increment/decrement the post animation trigger in case there are no children
         // to ensure that it runs
         ctx.postAnimationTrigger.increment();
+
+        // Hide clear recents button before return to home
+        startHideClearRecentsButtonAnimation();
+
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
@@ -248,6 +265,25 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
         // Notify of the exit animation
         mCb.onExitToHomeAnimationTriggered();
+    }
+
+    public void startHideClearRecentsButtonAnimation() {
+        if (mClearRecentsLayout != null) {
+            mClearRecentsLayout.animate()
+                .alpha(0f)
+                .setStartDelay(0)
+                .setUpdateListener(null)
+                .setInterpolator(mConfig.fastOutSlowInInterpolator)
+                .setDuration(mConfig.taskViewRemoveAnimDuration)
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mClearRecentsLayout.setVisibility(View.GONE);
+                        mClearRecentsLayout.setAlpha(1f);
+                    }
+                })
+                .start();
+        }
     }
 
     /** Adds the search bar */
@@ -289,8 +325,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         int height = MeasureSpec.getSize(heightMeasureSpec);
 
         // Get the search bar bounds and measure the search bar layout
+        Rect searchBarSpaceBounds = new Rect();
         if (mSearchBar != null) {
-            Rect searchBarSpaceBounds = new Rect();
             mConfig.getSearchBarBounds(width, height, mConfig.systemInsets.top, searchBarSpaceBounds);
             mSearchBar.measure(
                     MeasureSpec.makeMeasureSpec(searchBarSpaceBounds.width(), MeasureSpec.EXACTLY),
@@ -304,6 +340,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         // Measure each TaskStackView with the full width and height of the window since the 
         // transition view is a child of that stack view
         int childCount = getChildCount();
+        int taskViewWidth = 0;
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
             if (child != mSearchBar && child.getVisibility() != GONE) {
@@ -311,10 +348,124 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 // Set the insets to be the top/left inset + search bounds
                 tsv.setStackInsetRect(taskStackBounds);
                 tsv.measure(widthMeasureSpec, heightMeasureSpec);
+
+                // Retrieve the max width of the task views
+                int taskViewChildCount = tsv.getChildCount();
+                for (int j = 0; j < taskViewChildCount; j++) {
+                    View taskViewChild = tsv.getChildAt(j);
+                    taskViewWidth = Math.max(taskViewChild.getMeasuredWidth(), taskViewWidth);
+                }
+
             }
         }
 
+        if (mClearRecents != null) {
+            ContentResolver resolver = getContext().getContentResolver();
+            Resources res = getContext().getResources();
+
+            boolean isLandscape = res.getConfiguration().orientation
+                    == Configuration.ORIENTATION_LANDSCAPE;
+            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams)
+                    mClearRecentsLayout.getLayoutParams();
+            int noMargin = res.getDimensionPixelSize(
+                    R.dimen.recents_fab_no_margin);
+            int navigationBarWidth = res.getDimensionPixelSize(
+                    com.android.internal.R.dimen.navigation_bar_width);
+            int marginSide =  (width / 2) - (taskViewWidth / 2);
+
+            int positionHorizontal = Settings.System.getInt(resolver,
+                    Settings.System.RECENT_APPS_CLEAR_ALL_POSITION_HORIZONTAL, 2);
+            int positionVertical = Settings.System.getInt(resolver,
+                    Settings.System.RECENT_APPS_CLEAR_ALL_POSITION_VERTICAL, 0);
+            int bgColor = Settings.System.getInt(resolver,
+                    Settings.System.RECENT_APPS_CLEAR_ALL_BG_COLOR, 0xff009688);
+
+            int gravityHorizontal;
+            int gravityVertical;
+            int marginTop = noMargin;
+            int marginBottom = noMargin;
+            int marginRight = noMargin;
+            int marginLeft = noMargin;
+
+            if (positionHorizontal == 0) {
+                gravityHorizontal = Gravity.LEFT;
+                if (isLandscape) {
+                    marginLeft = marginSide - (navigationBarWidth / 2);
+                } else {
+                    marginLeft = marginSide;
+                }
+            } else if (positionHorizontal == 1) {
+                gravityHorizontal = Gravity.CENTER_HORIZONTAL;
+            } else {
+                gravityHorizontal = Gravity.RIGHT;
+                if (isLandscape) {
+                    marginRight = marginSide + (navigationBarWidth / 2);
+                } else {
+                    marginRight = marginSide;
+                }
+            }
+            if (positionVertical == 0) {
+                gravityVertical = Gravity.TOP;
+                marginTop = taskStackBounds.top + res.getDimensionPixelSize(
+                    R.dimen.recents_fab_margin_top);
+            } else if (positionVertical == 1) {
+                gravityVertical = Gravity.CENTER_VERTICAL;
+            } else {
+                gravityVertical = Gravity.BOTTOM;
+                marginBottom = res.getDimensionPixelSize(
+                        R.dimen.recents_fab_margin_bottom);
+            }
+            params.topMargin = marginTop;
+            params.bottomMargin = marginBottom;
+            params.rightMargin = marginRight;
+            params.leftMargin = marginLeft;
+            params.gravity = gravityVertical | gravityHorizontal;
+            mClearRecentsLayout.setLayoutParams(params);
+
+            mClearRecentsLayout.getBackground().setColorFilter(bgColor, Mode.MULTIPLY);
+            mClearRecents.getDrawable().setTint(getClearRecentsIconColor(bgColor));
+        }
+
         setMeasuredDimension(width, height);
+    }
+    
+    private int getClearRecentsIconColor(int bgColor) {
+        ContentResolver resolver = mContext.getContentResolver();
+        Resources res = mContext.getResources();
+
+        boolean useIconColor = Settings.System.getInt(resolver,
+                Settings.System.RECENT_APPS_CLEAR_ALL_USE_ICON_COLOR, 0) == 1;
+        int iconColorLight = res.getColor(R.color.fab_icon_light_color);
+        int iconColorDark = res.getColor(R.color.fab_icon_dark_color);
+        int defaultIconColor = ColorHelper.isColorDark(bgColor) ?
+                iconColorLight : iconColorDark;
+        int iconColor = Settings.System.getInt(resolver,
+                Settings.System.RECENT_APPS_CLEAR_ALL_ICON_COLOR, defaultIconColor);
+
+        if (useIconColor) {
+            return iconColor;
+        } else {
+            return defaultIconColor;
+        }
+    }    
+
+    @Override
+    protected void onAttachedToWindow () {
+        super.onAttachedToWindow();
+        mClearRecentsLayout = (FrameLayout) ((View)getParent()).findViewById(R.id.clear_recents_layout);
+        mClearRecents = (ImageView) ((View)getParent()).findViewById(R.id.clear_recents);
+        mClearRecents.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (mClearRecentsLayout.getAlpha() != 1f) {
+                    return;
+                }
+
+                // Hide clear recents button before dismiss all tasks
+                startHideClearRecentsButtonAnimation();
+
+                dismissAllTasksAnimated();
+            }
+        });
     }
 
     public void noUserInteraction() {

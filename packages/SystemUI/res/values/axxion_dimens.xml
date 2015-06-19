@@ -10,4 +10,12 @@
 
     <dimen name="status_bar_expanded_header_elevation">4dp</dimen>
 
+ 
+    <!--Recents floating action button -->
+    <dimen name="recents_fab_height">56dp</dimen>
+    <dimen name="recents_fab_width">56dp</dimen>
+    <dimen name="recents_fab_translation_z">12dp</dimen>
+    <dimen name="recents_fab_no_margin">0dp</dimen>
+    <dimen name="recents_fab_margin_top">8dp</dimen>
+    <dimen name="recents_fab_margin_bottom">56dp</dimen>
 </resources>
