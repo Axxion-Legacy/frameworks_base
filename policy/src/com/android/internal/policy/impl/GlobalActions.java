@@ -126,10 +126,12 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private boolean mIsWaitingForEcmExit = false;
     private boolean mHasTelephony;
     private boolean mHasVibrator;
-    private final boolean mShowSilentToggle;
+    private final boolean mShouldShowSilentToggle;
+    private boolean mShowSilentToggle;
     private String[] mMenuActions;
     private boolean mRebootMenu;
     private boolean mUserMenu;
+    private int mGlobalActionsPosition;
 
     /**
      * @param context everything needs a context :(
@@ -164,8 +166,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         mHasVibrator = vibrator != null && vibrator.hasVibrator();
 
         // TODO check zen mode?
-        mShowSilentToggle = !mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_useFixedVolume);
+        mShouldShowSilentToggle = !mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_useFixedVolume);                
         mMenuActions = mContext.getResources().getStringArray(
                 com.android.internal.R.array.config_globalActionsList);
     }
@@ -205,6 +207,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     }
 
     private void handleShow() {
+        mGlobalActionsPosition = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.GLOBAL_ACTIONS_POSITION, 0);
+                    		
         awakenIfNecessary();
         mDialog = createDialog();
         prepareDialog();
@@ -217,8 +222,17 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         } else {
             WindowManager.LayoutParams attrs = mDialog.getWindow().getAttributes();
             attrs.setTitle("GlobalActions");
-            attrs.windowAnimations = R.style.GlobalActionsAnimation;
-            attrs.gravity = Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL;
+            if (mGlobalActionsPosition == 1) {
+				attrs.windowAnimations = R.style.GlobalActionsBottomAnimation;
+				attrs.gravity = Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL;
+            } else if (mGlobalActionsPosition == 2) {
+				attrs.windowAnimations = R.style.GlobalActionsTopAnimation;
+				attrs.gravity = Gravity.TOP|Gravity.CENTER_HORIZONTAL;
+			} else if (mGlobalActionsPosition == 3) {	
+				attrs.windowAnimations = R.style.GlobalActionsLeftAnimation;
+			} else if (mGlobalActionsPosition == 4) {	
+				attrs.windowAnimations = R.style.GlobalActionsRightAnimation;
+			}
             mDialog.getWindow().setAttributes(attrs);
             mDialog.show();
             mDialog.getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_DISABLE_EXPAND);
@@ -321,6 +335,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     }
 
     private void buildMenuList() {
+        mShowSilentToggle = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.GLOBAL_ACTIONS_SHOW_SOUND_PANEL, 1) == 1; 		
         mItems = new ArrayList<Action>();
         ArraySet<String> addedKeys = new ArraySet<String>();
         for (int i = 0; i < mMenuActions.length; i++) {
@@ -346,7 +362,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     mItems.add(getBugReportAction());
                 }
             } else if (GLOBAL_ACTION_KEY_SILENT.equals(actionKey)) {
-                if (mShowSilentToggle) {
+                if (mShouldShowSilentToggle && mShowSilentToggle) {
                     mItems.add(mSilentModeAction);
                 }
             } else if (GLOBAL_ACTION_KEY_USERS.equals(actionKey)) {

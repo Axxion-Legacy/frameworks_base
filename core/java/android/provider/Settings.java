@@ -4018,6 +4018,18 @@ public final class Settings {
          */
         public static final String NAVBAR_LEFT_IN_LANDSCAPE = "navigation_bar_left";
 
+       	/**
+		 * Wheter to show or not sound panel in power menu
+         * @hide
+         */
+        public static final String GLOBAL_ACTIONS_SHOW_SOUND_PANEL = "global_actions_show_sound_panel";            
+        
+       	/**
+		 * Wheter to show or not sound panel in power menu
+         * @hide
+         */
+        public static final String GLOBAL_ACTIONS_POSITION = "global_actions_position";         
+        
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.

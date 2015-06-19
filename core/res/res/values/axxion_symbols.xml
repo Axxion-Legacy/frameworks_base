@@ -22,7 +22,10 @@
   <!-- global actions -->
   <java-symbol type="id" name="option4" />
   <java-symbol type="id" name="option5" />
-  <java-symbol type="style" name="GlobalActionsAnimation" />
+  <java-symbol type="style" name="GlobalActionsBottomAnimation" />
+  <java-symbol type="style" name="GlobalActionsTopAnimation" />
+  <java-symbol type="style" name="GlobalActionsLeftAnimation" />
+  <java-symbol type="style" name="GlobalActionsRightAnimation" />
 
   <java-symbol type="id" name="hide_lock_to_app_checkbox" />
 
