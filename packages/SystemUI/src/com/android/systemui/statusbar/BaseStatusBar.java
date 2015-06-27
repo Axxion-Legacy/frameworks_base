@@ -108,6 +108,7 @@ import com.android.systemui.slimrecent.RecentController;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.NotificationData.Entry;
+import com.android.systemui.statusbar.notification.NotificationHelper;
 import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
@@ -271,6 +272,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     public boolean isDeviceProvisioned() {
         return mDeviceProvisioned;
     }
+
+    // Notification helper
+    protected NotificationHelper mNotificationHelper;
 
     protected final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
@@ -620,6 +624,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         // Connect in to the status bar manager service
         StatusBarIconList iconList = new StatusBarIconList();
         mCommandQueue = new CommandQueue(this, iconList);
+
+        mNotificationHelper = new NotificationHelper(this, mContext);
 
         int[] switches = new int[8];
         ArrayList<IBinder> binders = new ArrayList<IBinder>();
@@ -1554,8 +1560,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         PendingIntent contentIntent = sbn.getNotification().contentIntent;
         if (contentIntent != null) {
-            final View.OnClickListener listener = makeClicker(contentIntent, sbn.getKey(),
-                    isHeadsUp);
+            final View.OnClickListener listener = mNotificationHelper.getNotificationClickListener
+                    (entry, isHeadsUp);
             row.setOnClickListener(listener);
         } else {
             row.setOnClickListener(null);
@@ -1721,15 +1727,20 @@ public abstract class BaseStatusBar extends SystemUI implements
         return new NotificationClicker(intent, notificationKey, forHun);
     }
 
-    protected class NotificationClicker implements View.OnClickListener {
+    public class NotificationClicker implements View.OnClickListener {
         private PendingIntent mIntent;
         private final String mNotificationKey;
         private boolean mIsHeadsUp;
+        public boolean mFloat;
 
         public NotificationClicker(PendingIntent intent, String notificationKey, boolean forHun) {
             mIntent = intent;
             mNotificationKey = notificationKey;
             mIsHeadsUp = forHun;
+        }
+
+        public void makeFloating(boolean floating) {
+            mFloat = floating;
         }
 
         public void onClick(final View v) {
@@ -1767,8 +1778,12 @@ public abstract class BaseStatusBar extends SystemUI implements
                             }
 
                             if (mIntent != null) {
+                                Intent overlay = new Intent();
+                                int flags = Intent.FLAG_FLOATING_WINDOW | Intent.FLAG_ACTIVITY_CLEAR_TASK;
+
+                            if (mFloat) overlay.addFlags(flags);
                                 try {
-                                    mIntent.send();
+                                    mIntent.send(mContext, 0, overlay);
                                 } catch (PendingIntent.CanceledException e) {
                                     // the stack trace isn't very helpful here.
                                     // Just log the exception message.
@@ -2258,8 +2273,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         // update the contentIntent
         final PendingIntent contentIntent = notification.getNotification().contentIntent;
         if (contentIntent != null) {
-            final View.OnClickListener listener = makeClicker(contentIntent, notification.getKey(),
-                    isHeadsUp);
+            final View.OnClickListener listener =
+                    mNotificationHelper.getNotificationClickListener(entry, isHeadsUp);
             entry.row.setOnClickListener(listener);
         } else {
             entry.row.setOnClickListener(null);
