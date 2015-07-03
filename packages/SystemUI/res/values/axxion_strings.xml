@@ -16,7 +16,6 @@
 
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-
     <!-- Screenrecord Notification Ticker -->
     <string name="screenrecord_notif_ticker">Screen is being recorded</string>
 
@@ -66,4 +65,6 @@
     <string name="navring_choose_action_title">Choose action</string>
     <string name="select_application">Select application</string>
     <string name="lockscreen_target_empty">Empty</string>
+
+    <string name="floating_item_title">Floating Mode</string>
 </resources>
