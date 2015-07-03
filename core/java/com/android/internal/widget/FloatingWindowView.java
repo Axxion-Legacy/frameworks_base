@@ -17,6 +17,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.android.internal.R;
 
@@ -37,6 +38,7 @@ public class FloatingWindowView extends RelativeLayout {
     private RelativeLayout mTitleBarHeader;
     private ImageButton mTitleBarMin;
     private ImageButton mTitleBarMax;
+    private TextView mAppLabel;
     private ImageButton mTitleBarClose;
     private ImageButton mTitleBarMore;
     private View mContentViews;
@@ -72,10 +74,12 @@ public class FloatingWindowView extends RelativeLayout {
                                                "floating_window_more");
         mTitleBarClose = (ImageButton) findViewByIdHelper(mTitleBarHeader, R.id.floating_window_close,
                                                "floating_window_close");
-        mTitleBarMax = (ImageButton) findViewByIdHelper(mTitleBarHeader, R.id.floating_window_max,
-                                               "floating_window_max");
         mTitleBarMin = (ImageButton) findViewByIdHelper(mTitleBarHeader, R.id.floating_window_min,
                                                "floating_window_min");
+        mTitleBarMax = (ImageButton) findViewByIdHelper(mTitleBarHeader, R.id.floating_window_max,
+                                               "floating_window_max");
+		mAppLabel = (TextView) findViewByIdHelper(mTitleBarHeader, R.id.floating_window_label,
+                                               "floating_window_label");
         mDividerViews = findViewByIdHelper(mTitleBarHeader, R.id.floating_window_line,
                                                "floating_window_line");
 
@@ -84,6 +88,7 @@ public class FloatingWindowView extends RelativeLayout {
             || mTitleBarMore == null
             || mTitleBarMax == null
             || mTitleBarMin == null
+            || mAppLabel == null
             || mDividerViews == null) {
             return;
         }
@@ -91,24 +96,26 @@ public class FloatingWindowView extends RelativeLayout {
         mTitleBarClose.setImageDrawable(mResource.getDrawable(R.drawable.ic_floating_window_close));
         mTitleBarClose.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                activity.finish();
+                activity.finishAndRemoveTask();
             }
         });
 
-        mTitleBarMax.setImageDrawable(mResource.getDrawable(R.drawable.ic_floating_window_max));
-        mTitleBarMax.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                activity.setFullscreenApp();
-            }
-        });
+		mTitleBarMin.setImageDrawable(mResource.getDrawable(R.drawable.ic_floating_window_min));
+		mTitleBarMin.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				activity.restorePreviousLayoutApp();
+			}
+		});
+		
+		mTitleBarMax.setImageDrawable(mResource.getDrawable(R.drawable.ic_floating_window_max));
+		mTitleBarMax.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				activity.setFullscreenApp();
+			}
+		});
 
-        mTitleBarMin.setImageDrawable(mResource.getDrawable(R.drawable.ic_floating_window_min));
-        mTitleBarMin.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                activity.restorePreviousLayoutApp();
-            }
-        });
-
+		mAppLabel.setText(activity.getApplicationInfo().loadLabel(activity.getPackageManager()));
+       
         mTitleBarMore.setImageDrawable(mResource.getDrawable(R.drawable.ic_floating_window_more));
 
         final String menu_item1 = mResource.getString(R.string.floating_window_snap_top);
@@ -189,8 +196,8 @@ public class FloatingWindowView extends RelativeLayout {
         ViewGroup.LayoutParams divider_param = mDividerViews.getLayoutParams();
         divider_param.height = 2;
         mDividerViews.setLayoutParams(divider_param);
-    }
-
+	}
+	
     private View findViewByIdHelper(View view, int id, String tag) {
         View v = view.findViewById(id);
         if (v == null) {
@@ -223,7 +230,6 @@ public class FloatingWindowView extends RelativeLayout {
             || mContentViews == null) {
             return;
         }
-        mContentViews.setBackgroundDrawable(makeOutline(color, 1));
         mTitleBarHeader.setBackgroundColor(color);
     }
 
@@ -231,7 +237,7 @@ public class FloatingWindowView extends RelativeLayout {
         if (mTitleBarClose == null
             || mTitleBarMax == null
             || mTitleBarMin == null
-            || mTitleBarMore == null
+			|| mTitleBarMore == null
             || mDividerViews == null) {
             return;
         }
@@ -239,6 +245,7 @@ public class FloatingWindowView extends RelativeLayout {
         mTitleBarMax.setColorFilter(color, Mode.SRC_ATOP);
         mTitleBarMin.setColorFilter(color, Mode.SRC_ATOP);
         mTitleBarClose.setColorFilter(color, Mode.SRC_ATOP);
+        mAppLabel.setTextColor(color);
         mDividerViews.setBackgroundColor(color);
     }
 

@@ -60,6 +60,7 @@
   <java-symbol type="id" name="floating_window_background" />
   <java-symbol type="id" name="floating_window_titlebar" />
   <java-symbol type="id" name="floating_window_close" />
+  <java-symbol type="id" name="floating_window_label" />  
   <java-symbol type="id" name="floating_window_max" />
   <java-symbol type="id" name="floating_window_min" />
   <java-symbol type="id" name="floating_window_more" />
