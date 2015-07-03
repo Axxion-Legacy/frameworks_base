@@ -7076,7 +7076,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void showBootMessage(final CharSequence msg, final boolean always) {
         mHandler.post(new Runnable() {
             @Override public void run() {
-				String currentPackageName = "eat.a.sandwisshhhhh";
                 if (mBootMsgDialog == null) {
                     int theme;
                     if (mContext.getPackageManager().hasSystemFeature(
