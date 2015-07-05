@@ -100,21 +100,27 @@ public class FloatingWindowView extends RelativeLayout {
             }
         });
 
-		mTitleBarMin.setImageDrawable(mResource.getDrawable(R.drawable.ic_floating_window_min));
-		mTitleBarMin.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				activity.restorePreviousLayoutApp();
-			}
-		});
-		
-		mTitleBarMax.setImageDrawable(mResource.getDrawable(R.drawable.ic_floating_window_max));
-		mTitleBarMax.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				activity.setFullscreenApp();
-			}
-		});
+        mTitleBarMin.setImageDrawable(mResource.getDrawable(R.drawable.ic_floating_window_min));
+        mTitleBarMin.setVisibility(View.GONE);
+        mTitleBarMin.setOnClickListener(new OnClickListener() {
+        public void onClick(View v) {
+                activity.restorePreviousLayoutApp();
+                mTitleBarMin.setVisibility(View.GONE);
+                mTitleBarMax.setVisibility(View.VISIBLE);
+            }
+        });
 
-		mAppLabel.setText(activity.getApplicationInfo().loadLabel(activity.getPackageManager()));
+        mTitleBarMax.setImageDrawable(mResource.getDrawable(R.drawable.ic_floating_window_max));
+        mTitleBarMax.setVisibility(View.VISIBLE);
+        mTitleBarMax.setOnClickListener(new OnClickListener() {
+        public void onClick(View v) {
+                activity.setFullscreenApp();
+                mTitleBarMin.setVisibility(View.VISIBLE);
+                mTitleBarMax.setVisibility(View.GONE);
+            }
+        });
+
+        mAppLabel.setText(activity.getApplicationInfo().loadLabel(activity.getPackageManager()));
        
         mTitleBarMore.setImageDrawable(mResource.getDrawable(R.drawable.ic_floating_window_more));
 
