@@ -40,8 +40,6 @@ import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
-import com.android.systemui.R;
-
 import java.util.ArrayList;
 
 /**
@@ -159,7 +157,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             View child = getChildAt(i);
             if (child != mSearchBar) {
                 TaskStackView stackView = (TaskStackView) child;
-                stackView.dismissAllTasks();
+                //stackView.dismissAllTasks();
             }
         }
     }
@@ -328,12 +326,12 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     @Override
     protected void onAttachedToWindow () {
         super.onAttachedToWindow();
-        mClearRecents = ((View)getParent()).findViewById(R.id.clear_recents);
-        mClearRecents.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                dismissAllTasksAnimated();
-            }
-        });
+        //mClearRecents = ((View)getParent()).findViewById(R.id.clear_recents);
+        //mClearRecents.setOnClickListener(new View.OnClickListener() {
+        //    public void onClick(View v) {
+        //        dismissAllTasksAnimated();
+        ///    }
+       // });
     }
 
     /**
