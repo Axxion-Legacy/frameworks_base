@@ -17,6 +17,8 @@
 -->
 <resources>
 
+    <color name="battery_level_color">#ffffffff</color>
+
     <!-- tint of the Visualizer tile -->
     <color name="visualizer_fill_color">#96FFFFFF</color>
     

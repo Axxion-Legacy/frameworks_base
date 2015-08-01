@@ -6063,7 +6063,7 @@ public final class Settings {
             PRIVACY_GUARD_DEFAULT,
             PRIVACY_GUARD_NOTIFICATION,
             STATUS_BAR_LOCKED_ON_SECURE_KEYGUARD,
-            LOCKSCREEN_QUICK_UNLOCK_CONTROL
+            LOCKSCREEN_QUICK_UNLOCK_CONTROL,
             PRIVACY_GUARD_DEFAULT
         };
 
