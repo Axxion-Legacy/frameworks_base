@@ -603,7 +603,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
     
     private void triggerPowerMenuDialog() {
-        Intent intent = new Intent(Intent.ACTION_POWERMENU);
+        Intent intent = new Intent(Intent.ACTION_POWER_MENU);
         mContext.sendBroadcast(intent); /* broadcast action */
         mActivityStarter.startActivity(intent,
                 true /* dismissShade */);
