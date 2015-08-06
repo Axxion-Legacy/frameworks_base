@@ -5509,20 +5509,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
     };
-
-    private final Runnable mScreenshotRunnable = new Runnable() {
-        @Override
-        public void run() {
-            takeScreenshot();
-        }
-    };
-
-    private final Runnable mScreenrecordRunnable = new Runnable() {
-        @Override
-        public void run() {
-            takeScreenrecord();
-        }
-    };
     
     // Assume this is called from the Handler thread.
     private void takeScreenshot() {
