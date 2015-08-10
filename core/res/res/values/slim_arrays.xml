@@ -82,6 +82,8 @@
         <item>@string/app_ops_toggle_mobile_data</item>
         <item>@string/app_ops_alarm_wakeup</item>
         <item>@string/app_ops_su</item>
+        <item>read other accounts</item>
+        <item>read phone info</item>        
     </string-array>
 
     <!-- Do not translate. Defines the mapping of notification package names

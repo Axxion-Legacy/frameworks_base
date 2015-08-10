@@ -28,7 +28,6 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:background="?android:attr/actionBarItemBackground"
-        android:contentDescription="@string/silent_mode_none"
         android:focusable="true"
         >
         <ImageView
@@ -50,7 +49,6 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:background="?android:attr/actionBarItemBackground"
-        android:contentDescription="@string/silent_mode_priority"
         android:focusable="true"
         >
         <ImageView
