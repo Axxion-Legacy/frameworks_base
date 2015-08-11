@@ -17,7 +17,7 @@
 <resources>
     <color name="navring_check_tint">@android:color/white</color>
     <color name="navring_edit_fill">#FF558B2F</color>
-    <color name="navring_edit_tint">#FF689F38</color
+    <color name="navring_edit_tint">#FF689F38</color>
     
     <!-- Exposed resources for theming -->
     <color name="qs_user_detail_name_text">@color/exposed_qs_user_detail_name</color>
