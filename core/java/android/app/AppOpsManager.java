@@ -605,9 +605,9 @@ public class AppOpsManager {
         OPSTR_DELETE_CALL_LOG,
         OPSTR_DATA_CONNECT_CHANGE,
         OPSTR_OTHER_ACCOUNTS,
-        OPSTR_READ_PHONE_INFO
+        OPSTR_READ_PHONE_INFO,
         OPSTR_ALARM_WAKEUP,
-        OPSTR_SU,
+        OPSTR_SU
     };
 
     /**

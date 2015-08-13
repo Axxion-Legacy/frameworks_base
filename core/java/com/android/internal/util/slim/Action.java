@@ -46,7 +46,6 @@ import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyControl;
 
 import com.android.internal.R;
-import com.android.internal.util.omni.TaskUtils;
 import com.android.internal.statusbar.IStatusBarService;
 
 import java.net.URISyntaxException;
@@ -119,10 +118,10 @@ public class Action {
                 triggerVirtualKeypress(KeyEvent.KEYCODE_SEARCH, isLongpress);
                 return;
             } else if (action.equals(ActionConstants.ACTION_KILL)) {
--                try {
--                    barService.toggleKillApp();
--                } catch (RemoteException e) {}
-                return;
+                try {
+                    barService.toggleKillApp();
+                } catch (RemoteException e) {}
+               return;
             } else if (action.equals(ActionConstants.ACTION_NOTIFICATIONS)) {
                 if (isKeyguardShowing && isKeyguardSecure) {
                     return;
