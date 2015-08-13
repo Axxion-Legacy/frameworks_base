@@ -33,15 +33,15 @@ import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternUtils;
 
-import java.util.Arrays;
+import static java.util.Arrays.asList;
 import java.util.Collections;
 import java.util.List;
 
 public class NumPadKey extends ViewGroup {
     // list of "ABC", etc per digit, starting with '0'
     static String sKlondike[];
-    
-    private static List<Integer> sDigits = Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+
+    private static List<Integer> sDigits = asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
     private static int sCount = 0;
     private static boolean sShuffled;
     private int mDigit = -1;
@@ -51,8 +51,6 @@ public class NumPadKey extends ViewGroup {
     private TextView mKlondikeText;
     private boolean mEnableHaptics;
     private PowerManager mPM;
-
-    private TypedArray mStyleable;
 
     private View.OnClickListener mListener = new View.OnClickListener() {
         @Override
@@ -87,9 +85,14 @@ public class NumPadKey extends ViewGroup {
         super(context, attrs, defStyle);
         setFocusable(true);
 
-        mStyleable = context.obtainStyledAttributes(attrs, R.styleable.NumPadKey);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.NumPadKey);
 
-        mTextViewResId = mStyleable.getResourceId(R.styleable.NumPadKey_textView, 0);
+        try {
+            mDigit = a.getInt(R.styleable.NumPadKey_digit, mDigit);
+            mTextViewResId = a.getResourceId(R.styleable.NumPadKey_textView, 0);
+        } finally {
+            a.recycle();
+        }
 
         setOnClickListener(mListener);
         setOnHoverListener(new LiftToActivateListener(context));
@@ -115,10 +118,7 @@ public class NumPadKey extends ViewGroup {
                 sShuffled = true;
             }
             mDigit = sDigits.get(sCount);
-        } else {
-            mDigit = mStyleable.getInt(R.styleable.NumPadKey_digit, mDigit);
         }
-
         mDigitText.setText(Integer.toString(mDigit));
 
         if (mDigit >= 0) {
@@ -190,4 +190,5 @@ public class NumPadKey extends ViewGroup {
         sCount = 0;
         sShuffled = false;
     }
+
 }

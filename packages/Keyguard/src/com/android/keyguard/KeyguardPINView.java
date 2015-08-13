@@ -139,25 +139,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
                 .setDuration(500)
                 .setInterpolator(mAppearAnimationUtils.getInterpolator())
                 .translationY(0);
-        mAppearAnimationUtils.startAppearAnimation(new View[][] {
-                new View[] {
-                        mRow0, null, null
-                },
-                new View[] {
-                        findViewById(R.id.key1), findViewById(R.id.key2), findViewById(R.id.key3)
-                },
-                new View[] {
-                        findViewById(R.id.key4), findViewById(R.id.key5), findViewById(R.id.key6)
-                },
-                new View[] {
-                        findViewById(R.id.key7), findViewById(R.id.key8), findViewById(R.id.key9)
-                },
-                new View[] {
-                        findViewById(R.id.key_random), findViewById(R.id.key0), findViewById(R.id.key_enter)
-                },
-                new View[] {
-                        null, mEcaView, null
-                }},
+        mAppearAnimationUtils.startAnimation(mViews,
                 new Runnable() {
                     @Override
                     public void run() {
